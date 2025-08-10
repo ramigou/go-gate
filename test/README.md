@@ -6,7 +6,35 @@ This directory contains testing tools and scripts for the Go-Gate L7 reverse pro
 
 ## Quick Start
 
-### 1. Start Mock Backend Servers
+You can test Go-Gate using **Docker** (recommended) or **Local Development**.
+
+### 🐳 Method 1: Docker Testing (Recommended)
+
+**Prerequisites:** Docker Desktop installed and running
+
+```bash
+# Start everything (1 command)
+./docker/start.sh
+
+# Run tests
+./docker/test.sh
+
+# Stop all services
+./docker/stop.sh
+```
+
+**What it does:**
+- ✅ Builds Go-Gate proxy automatically
+- ✅ Starts 3 mock servers in containers
+- ✅ Sets up networking between containers  
+- ✅ Runs health checks
+- ✅ No local dependencies needed
+
+### 💻 Method 2: Local Testing
+
+**Prerequisites:** Go 1.24.6+, Python 3.7+
+
+#### Step 1: Start Mock Backend Servers
 
 ```bash
 # Terminal 1: Start mock backend servers
@@ -14,21 +42,22 @@ cd test/
 python3 mock-servers.py
 ```
 
-This will start three mock HTTP servers:
+This starts three mock HTTP servers:
 - `localhost:3001` - API Server 1 (weight: 2)
 - `localhost:3002` - API Server 2 (weight: 1)  
 - `localhost:4000` - Web Server (weight: 1)
 
-### 2. Start the Proxy Server
+#### Step 2: Start the Proxy Server
 
 ```bash
 # Terminal 2: Start the reverse proxy
+go build -o go-gate cmd/server/main.go
 ./go-gate -config configs/test-config.yaml
 ```
 
-The proxy will start on `localhost:8080` and route requests to the mock servers.
+The proxy starts on `localhost:8080` and routes requests to mock servers.
 
-### 3. Run Tests
+#### Step 3: Run Tests
 
 ```bash
 # Terminal 3: Run automated tests
@@ -36,26 +65,45 @@ cd test/
 ./test-requests.sh
 ```
 
+### 🔄 Both Methods Use Same Tests
+
+The `test-requests.sh` script works with both Docker and local setups!
+
 ## Test Files
 
-### `mock-servers.py`
-Python script that creates three HTTP servers for testing:
-- Returns JSON responses with server info, request details, and timestamps
-- Handles both GET and POST requests
-- Includes `/health` endpoint for health checks
-- Logs all incoming requests
+### Local Testing Files
+- **`mock-servers.py`** - Runs all 3 mock servers locally (for Method 2)
+- **`test-requests.sh`** - Test script that works with both methods
+- **`README.md`** - This documentation
 
-### `test-requests.sh`
-Shell script that tests various proxy scenarios:
-- Path-based routing (`/api/*`)
-- Host-based routing (`admin.example.com`, `*.example.com`)
-- Load balancing verification
-- Default routing fallback
-- POST request handling
-- Health check endpoints
+### Docker Testing Files  
+- **`docker-mock-server.py`** - Single server for Docker containers (for Method 1)
+- **`../docker-compose.yml`** - Docker service definitions
+- **`../Dockerfile`** - Go-Gate container build instructions
 
-### `test-config.yaml`
-Simplified configuration for testing (without health check settings).
+### Configuration Files
+- **`../configs/test-config.yaml`** - Local testing configuration (localhost URLs)
+- **`../configs/docker-config.yaml`** - Docker testing configuration (container hostnames)
+
+### File Purposes
+
+**`mock-servers.py` (Local Method):**
+- Creates 3 HTTP servers in one process
+- Uses localhost URLs (`localhost:3001`, `localhost:3002`, etc.)
+- Returns JSON with server info, request details, timestamps
+- Handles GET/POST requests and `/health` endpoint
+
+**`docker-mock-server.py` (Docker Method):**
+- Creates 1 HTTP server per container
+- Uses environment variables for configuration
+- Same response format as local version
+
+**`test-requests.sh` (Both Methods):**
+- Tests path-based routing (`/api/*`)
+- Tests host-based routing (`admin.example.com`, `*.example.com`)
+- Verifies load balancing distribution
+- Tests POST requests and health endpoints
+- **Smart detection**: Works with both localhost and Docker URLs
 
 ## Manual Testing
 
