@@ -1,5 +1,7 @@
 # Go-Gate L7 Reverse Proxy
 
+*Read this in other languages: [한국어](README.ko.md), [日本語](README.ja.md)*
+
 A lightweight Layer 7 reverse proxy server built in Go, supporting host-based and path-based routing with load balancing.
 
 ## Features

@@ -1,5 +1,7 @@
 # Testing Go-Gate Reverse Proxy
 
+*Read this in other languages: [한국어](README.ko.md), [日本語](README.ja.md)*
+
 This directory contains testing tools and scripts for the Go-Gate L7 reverse proxy server.
 
 ## Quick Start
